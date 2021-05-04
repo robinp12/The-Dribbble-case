@@ -8,9 +8,9 @@ import java.util.Iterator;
 public class Graph {
 
     int time = 0;
-    int a=0;
     static final int NIL = -1;
     ArrayList<ArrayList<Integer>> adjacencyList;
+
 
     ArrayList<String[]> allDesigners;
     ArrayList<String[]> allFollowers;
@@ -51,28 +51,41 @@ public class Graph {
     public void addEdge( int follower, int followed){
         adjacencyList.get(follower).add(followed);
         //System.out.println(follower+" a suivi "+followed);
+
     }
-    public void build(){
+
+    /**
+     * Build an adjency list used to manipulate the graph
+     * @param isDirected : if false then add a link from B->A additionnaly to the A->B
+     */
+    public void build(boolean isDirected){
 
         for(int i=0; i<allDesigners.size(); i++){
-            adjacencyList.add(new ArrayList<>());
+            adjacencyList.add(new ArrayList<Integer>());
         }
 
-        for(int i = 0; i<allFollowers.size(); i++){
+        for(int i=0; i<allFollowers.size(); i++){
             int follower = Integer.parseInt(String.valueOf(allFollowers.get(i)[0]));
             int followed= Integer.parseInt(allFollowers.get(i)[1]);
             addEdge(follower, followed);
+            if(!isDirected){
+                addEdge(followed,follower);
+            }
         }
+
     }
 
     public void showAdjencyList(){
         for (int i = 0; i < adjacencyList.size(); i++) {
+
             if(!adjacencyList.get(i).isEmpty()){
                 System.out.println("\nAdjacency list of vertex " + i);
                 System.out.print("head");
                 for (int j = 0; j < adjacencyList.get(i).size(); j++) {
+
                     System.out.print(" -> "+adjacencyList.get(i).get(j));
                 }
+                System.out.println();
             }
         }
     }
@@ -83,9 +96,9 @@ public class Graph {
     // visited[] --> keeps tract of visited vertices
     // disc[] --> Stores discovery times of visited vertices
     // parent[] --> Stores parent vertices in DFS tree
-    void bridgeUtil(int u, boolean visited[], int disc[],
-                    int low[], int parent[])
+    void bridgeUtil(int u, boolean visited[], int disc[], int low[], int parent[])
     {
+
         // Mark the current node as visited
         visited[u] = true;
 
@@ -114,7 +127,6 @@ public class Graph {
                 // under v is below u in DFS tree, then u-v is
                 // a bridge
                 if (low[v] > disc[u])
-                    a++;
                     System.out.println(u+"-->"+v);
             }
 
@@ -146,10 +158,8 @@ public class Graph {
         // Call the recursive helper function to find Bridges
         // in DFS tree rooted with vertex 'i'
         for (int i = 0; i < adjacencyList.size(); i++)
-            if (visited[i] == false) {
+            if (visited[i] == false)
                 bridgeUtil(i, visited, disc, low, parent);
-            }
-        System.out.println("Bridge number : " +a);
     }
 
     public void nodeWithMoreThanXConnection( int size){
@@ -159,6 +169,7 @@ public class Graph {
                 System.out.println("\nAdjacency list of vertex " + i);
                 System.out.print("head");
                 for (int j = 0; j < adjacencyList.get(i).size(); j++) {
+
                     System.out.print(" -> "+adjacencyList.get(i).get(j));
                 }
                 System.out.println();
@@ -166,9 +177,13 @@ public class Graph {
         }
     }
 
+    public void componentCounter() {
+
+    }
+
     public  Graph(){
 
-        this.adjacencyList = new ArrayList<>();
+        this.adjacencyList = new ArrayList<ArrayList<Integer>>();
 
         this.allShots = extract("shots.csv");
         this.allDesigners = extract("designers.csv");
@@ -177,8 +192,8 @@ public class Graph {
 
     public static void main(String[] args) {
         Graph graph = new Graph();
-        graph.showAdjencyList();
-        graph.build();
+        graph.build(true);
         graph.bridge();
+        //graph.nodeWithMoreThanXConnection(30);
     }
 }
