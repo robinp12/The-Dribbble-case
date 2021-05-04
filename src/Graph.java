@@ -9,13 +9,16 @@ public class Graph {
 
     int time = 0;
     static final int NIL = -1;
-    ArrayList<ArrayList<Integer>> adjacencyList;
 
+    ArrayList<ArrayList<Integer>> adjacencyList;
 
     ArrayList<String[]> allDesigners;
     ArrayList<String[]> allFollowers;
     ArrayList<String[]> allShots;
 
+    // for component count
+    ArrayList<Boolean> visited;
+    int numberOfComponent;
 
     public ArrayList<String[]>  extract(String name){
         String COMMA_DELIMITER = ",";
@@ -177,9 +180,42 @@ public class Graph {
         }
     }
 
-    public void componentCounter() {
+
+    /**
+     *  walk through the graph and mark the node as visited
+     * @param nodeId id of a node
+     *
+     *  Check a node and all of its neighbors (and theirs neighbors, ... recursively)
+     */
+    public void graphWalker(int nodeId) {
+
+        //mark node as visited
+        visited.set(nodeId, true);
+        //for all neighbor : check if they are visited
+        for(int neighbor: adjacencyList.get(nodeId) ){
+            //if yes, then check their own neighbor
+            if(visited.get(neighbor)== false){
+                graphWalker(neighbor);
+            }
+        }
 
     }
+
+    public void componentCounter() {
+
+        //every node is checked if it has been visited
+        for(int i=0; i<allDesigners.size(); i++){
+
+            if(visited.get(i) == false){
+                //if the node is not visited, it and all its connected node are visited
+                graphWalker(i);
+                numberOfComponent++;
+            }
+
+        }
+        System.out.println("Number of components : "+numberOfComponent);
+    }
+
 
     public  Graph(){
 
@@ -188,12 +224,20 @@ public class Graph {
         this.allShots = extract("shots.csv");
         this.allDesigners = extract("designers.csv");
         this.allFollowers = extract("followers.csv");
+        this.visited = new ArrayList<Boolean>();
+        this.numberOfComponent = 0;
+
+        //mark all node as non visited
+        for(int i=0; i<allDesigners.size(); i++){
+            visited.add(false);
+        }
     }
 
     public static void main(String[] args) {
         Graph graph = new Graph();
-        graph.build(true);
-        graph.bridge();
+        graph.build(false);
+        //graph.bridge();
         //graph.nodeWithMoreThanXConnection(30);
+        graph.componentCounter();
     }
 }
