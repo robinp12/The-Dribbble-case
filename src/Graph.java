@@ -1,9 +1,10 @@
+import com.sun.javafx.collections.MappingChange;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 public class Graph {
 
@@ -17,8 +18,10 @@ public class Graph {
     ArrayList<String[]> allShots;
 
     // for component count
-    ArrayList<Boolean> visited;
+    Map<Integer, Boolean> visited;
     int numberOfComponent;
+    Map<Integer, HashSet <Integer>> adjencyMap;
+
 
     public ArrayList<String[]>  extract(String name){
         String COMMA_DELIMITER = ",";
@@ -57,26 +60,7 @@ public class Graph {
 
     }
 
-    /**
-     * Build an adjency list used to manipulate the graph
-     * @param isDirected : if false then add a link from B->A additionnaly to the A->B
-     */
-    public void build(boolean isDirected){
 
-        for(int i=0; i<allDesigners.size(); i++){
-            adjacencyList.add(new ArrayList<Integer>());
-        }
-
-        for(int i=0; i<allFollowers.size(); i++){
-            int follower = Integer.parseInt(String.valueOf(allFollowers.get(i)[0]));
-            int followed= Integer.parseInt(allFollowers.get(i)[1]);
-            addEdge(follower, followed);
-            if(!isDirected){
-                addEdge(followed,follower);
-            }
-        }
-
-    }
 
     public void showAdjencyList(){
         for (int i = 0; i < adjacencyList.size(); i++) {
@@ -180,7 +164,9 @@ public class Graph {
         }
     }
 
-
+    /////////////////////////////////////////////////////////////////
+    ///////////////COMPTER LE NBR DE SOUS GRAPHES////////////////////
+    /////////////////////////////////////////////////////////////////
     /**
      *  walk through the graph and mark the node as visited
      * @param nodeId id of a node
@@ -190,32 +176,80 @@ public class Graph {
     public void graphWalker(int nodeId) {
 
         //mark node as visited
-        visited.set(nodeId, true);
+        visited.put(nodeId, true);
         //for all neighbor : check if they are visited
-        for(int neighbor: adjacencyList.get(nodeId) ){
-            //if yes, then check their own neighbor
-            if(visited.get(neighbor)== false){
-                graphWalker(neighbor);
+        if(adjencyMap.get(nodeId)!=null){
+            for(int neighbor: adjencyMap.get(nodeId) ){
+                //if yes, then check their own neighbor
+                if(visited.get(neighbor)== false){
+                    graphWalker(neighbor);
+                }
             }
         }
-
     }
 
     public void componentCounter() {
 
         //every node is checked if it has been visited
-        for(int i=0; i<allDesigners.size(); i++){
+        for(Integer node : visited.keySet()){
 
-            if(visited.get(i) == false){
+            if(visited.get(node) == false){
                 //if the node is not visited, it and all its connected node are visited
-                graphWalker(i);
+                graphWalker(node);
                 numberOfComponent++;
             }
 
         }
         System.out.println("Number of components : "+numberOfComponent);
     }
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+/*
+    /**
+     * Build an adjency list used to manipulate the graph
+     * @param isDirected : if false then add a link from B->A additionnaly to the A->B
+     *
+    public void build(boolean isDirected){
 
+        for(int i=0; i<allDesigners.size(); i++){
+            adjacencyList.add(new ArrayList<Integer>());
+        }
+
+        for(int i=0; i<allFollowers.size(); i++){
+            int follower = Integer.parseInt(String.valueOf(allFollowers.get(i)[0]));
+            int followed= Integer.parseInt(allFollowers.get(i)[1]);
+            addEdge(follower, followed);
+            if(!isDirected){
+                addEdge(followed,follower);
+            }
+        }
+
+    }*/
+    /**
+     * Build an adjency list used to manipulate the graph
+     * @param isDirected : if false then add a link from B->A additionnaly to the A->B
+     */
+    public void buildQ1(boolean isDirected){
+        for(int i=0; i<allFollowers.size();i++){
+
+            int follower = Integer.valueOf(allFollowers.get(i)[0]);
+            int followed = Integer.valueOf(allFollowers.get(i)[1]);
+
+            adjencyMap.putIfAbsent(followed, new HashSet<Integer>());
+            adjencyMap.putIfAbsent(follower, new HashSet<Integer>());
+
+            visited.put(followed, false);
+            visited.put(follower, false);
+
+            adjencyMap.get(follower).add(followed);
+            if(!isDirected){
+                adjencyMap.get(followed).add(follower);
+            }
+        }
+
+
+    }
 
     public  Graph(){
 
@@ -224,18 +258,15 @@ public class Graph {
         this.allShots = extract("shots.csv");
         this.allDesigners = extract("designers.csv");
         this.allFollowers = extract("followers.csv");
-        this.visited = new ArrayList<Boolean>();
+        this.visited = new HashMap<>();
         this.numberOfComponent = 0;
 
-        //mark all node as non visited
-        for(int i=0; i<allDesigners.size(); i++){
-            visited.add(false);
-        }
+        this.adjencyMap = new HashMap<Integer, HashSet<Integer>>();
     }
 
     public static void main(String[] args) {
         Graph graph = new Graph();
-        graph.build(false);
+        graph.buildQ1(false);
         //graph.bridge();
         //graph.nodeWithMoreThanXConnection(30);
         graph.componentCounter();
