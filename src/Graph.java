@@ -81,12 +81,15 @@ public class Graph {
         }
     }
 
-    // A recursive function that finds and prints bridges
-    // using DFS traversal
-    // u --> The vertex to be visited next
-    // visited[] --> keeps tract of visited vertices
-    // disc[] --> Stores discovery times of visited vertices
-    // parent[] --> Stores parent vertices in DFS tree
+    /**
+     * A recursive function that finds bridges using DFS traversal
+     *
+     * @param u         : The vertex to be visited next
+     * @param visited   : keeps tract of visited vertices
+     * @param disc      : Stores discovery times of visited vertices
+     * @param low
+     * @param parent    : Stores parent vertices in DFS tree
+     */
     void bridgeUtil(int u, Map visited, int disc[], int low[], int parent[])
     {
 
@@ -120,7 +123,6 @@ public class Graph {
                 // under v is below u in DFS tree, then u-v is
                 // a bridge
                 if (low[v] > disc[u])
-                    //System.out.println(u+"-->"+v);
                     nbrBridge++;
             }
 
@@ -160,27 +162,12 @@ public class Graph {
         System.out.println("Number of bridge : "+nbrBridge);
     }
 
-    public void nodeWithMoreThanXConnection( int size){
-        for (int i = 0; i < adjencyList.size(); i++) {
-
-            if(adjencyList.get(i).size()>size){
-                System.out.println("\nAdjacency list of vertex " + i);
-                System.out.print("head");
-                for (int j = 0; j < adjencyList.get(i).size(); j++) {
-
-                    System.out.print(" -> "+ adjencyList.get(i).get(j));
-                }
-                System.out.println();
-            }
-        }
-    }
-
     /////////////////////////////////////////////////////////////////
     ///////////////COMPTER LE NBR DE SOUS GRAPHES////////////////////
     /////////////////////////////////////////////////////////////////
     /**
-     *  walk through the graph and mark the node as visited
-     * @param nodeId id of a node
+     *  Walk through the graph and mark the node as visited
+     * @param nodeId : id of a node
      *
      *  Check a node and all of its neighbors (and theirs neighbors, ... recursively)
      */
@@ -192,19 +179,22 @@ public class Graph {
         if(adjencyMap.get(nodeId)!=null){
             for(int neighbor: adjencyMap.get(nodeId) ){
                 //if yes, then check their own neighbor
-                if(visited.get(neighbor)== false){
+                if(!visited.get(neighbor)){
                     graphWalker(neighbor);
                 }
             }
         }
     }
 
+    /**
+     * Launch a DFS for every node of the graph
+     */
     public void componentCounter() {
 
         //every node is checked if it has been visited
         for(Integer node : visited.keySet()){
 
-            if(visited.get(node) == false){
+            if(!visited.get(node)){
                 //if the node is not visited, it and all its connected node are visited
                 graphWalker(node);
                 numberOfComponent++;
@@ -218,7 +208,7 @@ public class Graph {
     /////////////////////////////////////////////////////////////////
 
 
-    public void recursiveLocalBCounter(){
+    public void localBridgeCounter(){
         int nbrLocalBridge = 0;
         //For every node
         for(Integer node1: adjencyMap.keySet()){
@@ -243,6 +233,8 @@ public class Graph {
         System.out.println("Number of local bridges : "+nbrLocalBridge);
     }
 
+    // Trop lent
+    /*
     public void localBCounter(){
         int nbrLocalBridge = 0;
         for(int node1 : adjencyMap.keySet()){
@@ -268,28 +260,8 @@ public class Graph {
             }
         }
         return communNeighbor;
-    }
-/*
-    /**
-     * Build an adjency list used to manipulate the graph
-     * @param isDirected : if false then add a link from B->A additionnaly to the A->B
-     *
-    public void build(boolean isDirected){
-
-        for(int i=0; i<allDesigners.size(); i++){
-            adjacencyList.add(new ArrayList<Integer>());
-        }
-
-        for(int i=0; i<allFollowers.size(); i++){
-            int follower = Integer.parseInt(String.valueOf(allFollowers.get(i)[0]));
-            int followed= Integer.parseInt(allFollowers.get(i)[1]);
-            addEdge(follower, followed);
-            if(!isDirected){
-                addEdge(followed,follower);
-            }
-        }
-
     }*/
+
     /**
      * Build an adjency list used to manipulate the graph
      * @param isDirected : if false then add a link from B->A additionnaly to the A->B
@@ -322,6 +294,9 @@ public class Graph {
 
     }
 
+    /**
+     * Constructor of a graph
+     */
     public  Graph(){
 
         this.allShots = extract("shots.csv");
@@ -339,10 +314,14 @@ public class Graph {
     public static void main(String[] args) {
         Graph graph = new Graph();
         graph.buildQ1(false);
-        //graph.nodeWithMoreThanXConnection(30);
+
         graph.componentCounter();
-        graph.recursiveLocalBCounter();
-        graph.localBCounter();
+        graph.localBridgeCounter();
+
+        //trop long
+        //graph.localBCounter();
+
         graph.bridge();
+        //System.out.println(graph.common_neighbor(0,256));
     }
 }
